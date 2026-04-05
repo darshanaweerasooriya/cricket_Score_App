@@ -1,135 +1,135 @@
-/* Dark Theme Base */
 body {
-  font-family: "Segoe UI", sans-serif;
-  background: linear-gradient(135deg, #0f172a, #1e293b);
-  color: #e2e8f0;
   margin: 0;
+  font-family: "Inter", sans-serif;
+  background: linear-gradient(135deg, #0f172a, #020617);
+  color: #e2e8f0;
 }
 
-/* Container */
 .container {
-  max-width: 900px;
+  max-width: 1300px;
   margin: auto;
-  padding: 20px;
+  padding: 40px 20px;
 }
 
-/* Title */
-h1 {
-  text-align: center;
-  margin-bottom: 25px;
-  font-size: 2rem;
-  color: #38bdf8;
-}
-
-/* Glass Card */
-.form,
-.players,
-.team,
-.team-names {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
-  padding: 15px;
-  margin-bottom: 20px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-}
-
-/* Inputs */
-input,
-select {
-  padding: 10px;
-  margin: 5px;
-  border-radius: 8px;
-  border: none;
-  outline: none;
-  background: #1e293b;
-  color: white;
-  width: 150px;
-}
-
-input::placeholder {
-  color: #94a3b8;
-}
-
-/* Buttons */
-button {
-  padding: 10px 15px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: 0.3s;
-}
-
-/* Primary Button */
-button {
-  background: #38bdf8;
-  color: black;
-}
-
-button:hover {
-  background: #0ea5e9;
-}
-
-/* Generate Button */
-.generate-btn {
-  background: #22c55e;
-}
-
-.generate-btn:hover {
-  background: #16a34a;
-}
-
-/* Swap Button */
-.swap-btn {
-  background: #f59e0b;
-}
-
-.swap-btn:hover {
-  background: #d97706;
-}
-
-/* Players List */
-.player {
-  padding: 10px;
-  margin: 6px 0;
-  border-radius: 8px;
-  background: #1e293b;
+.header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: 0.2s;
+  margin-bottom: 35px;
 }
 
-.player:hover {
-  background: #334155;
+.layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 30px;
+  align-items: start;
 }
 
-/* Highlight selected player */
-.player.selected {
-  border: 2px solid #facc15;
-  background: #334155;
+.card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  border-radius: 18px;
+  padding: 25px;
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
-/* Teams Layout */
-.teams {
+.left, .right {
   display: flex;
-  gap: 20px;
+  flex-direction: column;
+  gap: 25px;
 }
 
-.team {
-  flex: 1;
+.add-player {
+  position: sticky;
+  top: 20px;
+}
+
+input, select {
+  width: 100%;
+  padding: 12px;
+  margin-top: 12px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255,255,255,0.08);
+  color: white;
+}
+
+button {
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+  color: black;
+}
+
+.btn-secondary {
+  background: #334155;
+  color: white;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: white;
+}
+
+.logout-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white;
+}
+
+.toolbar {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.player {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  align-items: center;
+}
+
+.player input,
+.player select {
+  margin-top: 0;
+}
+
+.teams {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
 }
 
 .team h2 {
   text-align: center;
-  margin-bottom: 10px;
   color: #38bdf8;
+  margin-bottom: 15px;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+.captain-select {
+  margin-bottom: 15px;
+}
+
+.right > button {
+  margin-top: 15px;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
   .teams {
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 }

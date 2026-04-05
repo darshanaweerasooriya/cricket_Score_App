@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
 import "./teamselection.css";
 import jsPDF from "jspdf";
+import { useNavigate } from "react-router-dom";
 
 function TeamAssignment() {
+  const navigate = useNavigate();
+
   const [players, setPlayers] = useState([]);
   const [name, setName] = useState("");
   const [gender, setGender] = useState("male");
@@ -19,7 +22,10 @@ function TeamAssignment() {
     teamB: ""
   });
 
-  // Load saved data
+  useEffect(() => {
+    if (!localStorage.getItem("auth")) navigate("/");
+  }, [navigate]);
+
   useEffect(() => {
     const savedTeams = localStorage.getItem("teams");
     const savedCaptains = localStorage.getItem("captains");
@@ -28,37 +34,31 @@ function TeamAssignment() {
     if (savedCaptains) setCaptains(JSON.parse(savedCaptains));
   }, []);
 
-  // Add player
+  const logout = () => {
+    localStorage.removeItem("auth");
+    navigate("/");
+  };
+
   const addPlayer = () => {
     if (!name.trim()) return;
 
-    setPlayers([
-      ...players,
-      { id: Date.now(), name: name.trim(), gender }
-    ]);
+    setPlayers([...players, { id: Date.now(), name: name.trim(), gender }]);
     setName("");
   };
 
-  // Edit player
   const editPlayer = (id, field, value) => {
-    setPlayers(players.map(p =>
-      p.id === id ? { ...p, [field]: value } : p
-    ));
+    setPlayers(players.map(p => (p.id === id ? { ...p, [field]: value } : p)));
   };
 
-  // Shuffle
-  const shuffle = (array) => {
-    return [...array].sort(() => Math.random() - 0.5);
-  };
+  const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
 
-  // Generate teams
   const generateTeams = () => {
     if (players.length < 2) return;
 
     const males = shuffle(players.filter(p => p.gender === "male"));
     const females = shuffle(players.filter(p => p.gender === "female"));
 
-    const split = (arr) => {
+    const split = arr => {
       const mid = Math.ceil(arr.length / 2);
       return [arr.slice(0, mid), arr.slice(mid)];
     };
@@ -66,16 +66,15 @@ function TeamAssignment() {
     const [mA, mB] = split(males);
     const [fA, fB] = split(females);
 
-    const teamA = [...mA, ...fA];
-    const teamB = [...mB, ...fB];
+    const newTeams = {
+      teamA: [...mA, ...fA],
+      teamB: [...mB, ...fB]
+    };
 
-    const newTeams = { teamA, teamB };
     setTeams(newTeams);
-
     localStorage.setItem("teams", JSON.stringify(newTeams));
   };
 
-  // Swap players
   const handleSwap = (team, player) => {
     if (!swapMode) return;
 
@@ -84,9 +83,9 @@ function TeamAssignment() {
     } else {
       const newTeams = { ...teams };
 
-      const otherTeam = selectedPlayer.team;
       const p1 = selectedPlayer.player;
       const p2 = player;
+      const otherTeam = selectedPlayer.team;
 
       newTeams[team] = newTeams[team].map(p =>
         p.id === p2.id ? p1 : p
@@ -104,23 +103,16 @@ function TeamAssignment() {
     }
   };
 
-  // Captain change
   const handleCaptainChange = (teamKey, value) => {
-    const updated = {
-      ...captains,
-      [teamKey]: value
-    };
-
+    const updated = { ...captains, [teamKey]: value };
     setCaptains(updated);
     localStorage.setItem("captains", JSON.stringify(updated));
   };
 
-  // Export PDF
   const exportPDF = () => {
     const doc = new jsPDF();
 
     doc.text(teamAName, 10, 10);
-
     teams.teamA.forEach((p, i) => {
       const isCaptain = captains.teamA == p.id;
       doc.text(
@@ -131,7 +123,6 @@ function TeamAssignment() {
     });
 
     doc.text(teamBName, 100, 10);
-
     teams.teamB.forEach((p, i) => {
       const isCaptain = captains.teamB == p.id;
       doc.text(
@@ -144,16 +135,11 @@ function TeamAssignment() {
     doc.save("teams.pdf");
   };
 
-  // Reset all
   const resetAll = () => {
-    if (!window.confirm("Are you sure you want to reset everything?")) return;
+    if (!window.confirm("Reset everything?")) return;
 
     setPlayers([]);
     setTeams(null);
-    setTeamAName("Team A");
-    setTeamBName("Team B");
-    setSwapMode(false);
-    setSelectedPlayer(null);
     setCaptains({ teamA: "", teamB: "" });
 
     localStorage.removeItem("teams");
@@ -162,130 +148,140 @@ function TeamAssignment() {
 
   return (
     <div className="container">
-      <h1>🏏 Team Assignment</h1>
-
-      {/* Add Player */}
-      <div className="form">
-        <input
-          type="text"
-          placeholder="Enter player name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-
-        <select value={gender} onChange={(e) => setGender(e.target.value)}>
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-        </select>
-
-        <button onClick={addPlayer}>Add</button>
+      <div className="header">
+        <h1>🏏 Team Assignment</h1>
+        <button className="logout-btn" onClick={logout}>Logout</button>
       </div>
 
-      {/* Player List */}
-      <div className="players">
-        <h2>Players ({players.length})</h2>
+      <div className="layout">
 
-        {players.length === 0 && <p>No players added yet</p>}
+        {/* LEFT */}
+        <div className="left">
+          <div className="card add-player">
+            <h3>Add Player</h3>
 
-        {players.map((p) => (
-          <div key={p.id} className="player">
             <input
-              value={p.name}
-              onChange={(e) => editPlayer(p.id, "name", e.target.value)}
+              placeholder="Enter player name"
+              value={name}
+              onChange={e => setName(e.target.value)}
             />
 
-            <select
-              value={p.gender}
-              onChange={(e) => editPlayer(p.id, "gender", e.target.value)}
-            >
+            <select value={gender} onChange={e => setGender(e.target.value)}>
               <option value="male">Male</option>
               <option value="female">Female</option>
             </select>
+
+            <button
+              className="btn-primary"
+              onClick={addPlayer}
+              style={{ marginTop: "15px" }}
+            >
+              Add Player
+            </button>
           </div>
-        ))}
-      </div>
 
-      {/* Team Names */}
-      <div className="team-names">
-        <input
-          value={teamAName}
-          onChange={(e) => setTeamAName(e.target.value)}
-        />
-        <input
-          value={teamBName}
-          onChange={(e) => setTeamBName(e.target.value)}
-        />
-      </div>
+          <div className="card">
+            <h3>Players</h3>
 
-      {/* Buttons */}
-      <div style={{ marginTop: "20px" }}>
-        <button className="generate-btn" onClick={generateTeams}>
-          Generate Teams
-        </button>
+            {players.map(p => (
+              <div key={p.id} className="player">
+                <div style={{ flex: 2, minWidth: 0 }}>
+                  <input
+                    value={p.name}
+                    onChange={e => editPlayer(p.id, "name", e.target.value)}
+                  />
+                </div>
 
-        <button
-          className="swap-btn"
-          style={{ marginLeft: "10px" }}
-          onClick={() => {
-            setSwapMode(!swapMode);
-            setSelectedPlayer(null);
-          }}
-        >
-          {swapMode ? "Cancel Swap" : "Swap Players"}
-        </button>
+                <div style={{ flex: 1 }}>
+                  <select
+                    value={p.gender}
+                    onChange={e => editPlayer(p.id, "gender", e.target.value)}
+                  >
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                  </select>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-        <button
-          style={{ marginLeft: "10px", backgroundColor: "red", color: "white" }}
-          onClick={resetAll}
-        >
-          Reset All
-        </button>
-      </div>
+        {/* RIGHT */}
+        <div className="right">
+          <div className="card">
+            <h3>Team Names</h3>
 
-      {/* Teams */}
-      {teams && (
-        <div className="teams">
-          {["teamA", "teamB"].map((teamKey, index) => (
-            <div key={teamKey} className="team">
-              <h2>{index === 0 ? teamAName : teamBName}</h2>
+            <input
+              value={teamAName}
+              onChange={e => setTeamAName(e.target.value)}
+              style={{ marginBottom: "10px" }}
+            />
 
-              {/* Captain Selection */}
-              <select
-                value={captains[teamKey] || ""}
-                onChange={(e) => handleCaptainChange(teamKey, e.target.value)}
+            <input
+              value={teamBName}
+              onChange={e => setTeamBName(e.target.value)}
+            />
+
+            <div className="toolbar">
+              <button className="btn-primary" onClick={generateTeams}>
+                Generate Teams
+              </button>
+
+              <button
+                className="btn-secondary"
+                onClick={() => {
+                  setSwapMode(!swapMode);
+                  setSelectedPlayer(null);
+                }}
               >
-                <option value="">Select Captain</option>
-                {teams[teamKey].map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
+                {swapMode ? "Cancel Swap" : "Swap Players"}
+              </button>
 
-              {/* Players */}
-              {teams[teamKey].map((p) => (
-                <div
-                  key={p.id}
-                  className={`player ${
-                    selectedPlayer?.player.id === p.id ? "selected" : ""
-                  }`}
-                  onClick={() => handleSwap(teamKey, p)}
-                >
-                  {p.name} ({p.gender})
-                  {captains[teamKey] == p.id && " 👑"}
+              <button className="btn-danger" onClick={resetAll}>
+                Reset
+              </button>
+            </div>
+          </div>
+
+          {teams && (
+            <div className="teams">
+              {["teamA", "teamB"].map((teamKey, index) => (
+                <div key={teamKey} className="team card">
+                  <h2>{index === 0 ? teamAName : teamBName}</h2>
+
+                  <select
+                    className="captain-select"
+                    value={captains[teamKey] || ""}
+                    onChange={e => handleCaptainChange(teamKey, e.target.value)}
+                  >
+                    <option value="">Select Captain</option>
+                    {teams[teamKey].map(p => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
+
+                  {teams[teamKey].map(p => (
+                    <div
+                      key={p.id}
+                      className="player"
+                      onClick={() => handleSwap(teamKey, p)}
+                    >
+                      {p.name} ({p.gender})
+                      {captains[teamKey] == p.id && " 👑"}
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>
-          ))}
-        </div>
-      )}
+          )}
 
-      {/* Export */}
-      {teams && (
-        <button className="generate-btn" onClick={exportPDF}>
-          📄 Export PDF
-        </button>
-      )}
+          {teams && (
+            <button className="btn-primary" onClick={exportPDF}>
+              Export PDF
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
