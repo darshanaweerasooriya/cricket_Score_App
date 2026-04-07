@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 function TeamAssignment() {
   const navigate = useNavigate();
 
+  // 🔒 DEV LOCK (change to false to enable buttons)
   const DEV_LOCK = false;
 
   const [players, setPlayers] = useState([]);
@@ -54,35 +55,24 @@ function TeamAssignment() {
 
   const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
 
-  // ✅ UPDATED: PAIR-BASED TEAM GENERATION
   const generateTeams = () => {
     if (players.length < 2) return;
 
-    const shuffled = shuffle(players);
+    const males = shuffle(players.filter(p => p.gender === "male"));
+    const females = shuffle(players.filter(p => p.gender === "female"));
 
-    // Step 1: Create pairs
-    const pairs = [];
-    for (let i = 0; i < shuffled.length; i += 2) {
-      if (i + 1 < shuffled.length) {
-        pairs.push([shuffled[i], shuffled[i + 1]]);
-      } else {
-        pairs.push([shuffled[i]]); // odd player
-      }
-    }
+    const split = arr => {
+      const mid = Math.ceil(arr.length / 2);
+      return [arr.slice(0, mid), arr.slice(mid)];
+    };
 
-    // Step 2: Assign pairs alternately
-    const teamA = [];
-    const teamB = [];
+    const [mA, mB] = split(males);
+    const [fA, fB] = split(females);
 
-    pairs.forEach((pair, index) => {
-      if (index % 2 === 0) {
-        teamA.push(...pair);
-      } else {
-        teamB.push(...pair);
-      }
-    });
-
-    const newTeams = { teamA, teamB };
+    const newTeams = {
+      teamA: [...mA, ...fA],
+      teamB: [...mB, ...fB]
+    };
 
     setTeams(newTeams);
     localStorage.setItem("teams", JSON.stringify(newTeams));
@@ -184,7 +174,11 @@ function TeamAssignment() {
               <option value="female">Female</option>
             </select>
 
-            <button className="btn-primary" onClick={addPlayer}>
+            <button
+              className="btn-primary"
+              onClick={addPlayer}
+              style={{ marginTop: "15px" }}
+            >
               Add Player
             </button>
           </div>
@@ -194,18 +188,22 @@ function TeamAssignment() {
 
             {players.map(p => (
               <div key={p.id} className="player">
-                <input
-                  value={p.name}
-                  onChange={e => editPlayer(p.id, "name", e.target.value)}
-                />
+                <div style={{ flex: 2 }}>
+                  <input
+                    value={p.name}
+                    onChange={e => editPlayer(p.id, "name", e.target.value)}
+                  />
+                </div>
 
-                <select
-                  value={p.gender}
-                  onChange={e => editPlayer(p.id, "gender", e.target.value)}
-                >
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                </select>
+                <div style={{ flex: 1 }}>
+                  <select
+                    value={p.gender}
+                    onChange={e => editPlayer(p.id, "gender", e.target.value)}
+                  >
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                  </select>
+                </div>
               </div>
             ))}
           </div>
@@ -219,6 +217,7 @@ function TeamAssignment() {
             <input
               value={teamAName}
               onChange={e => setTeamAName(e.target.value)}
+              style={{ marginBottom: "10px" }}
             />
 
             <input
@@ -227,11 +226,13 @@ function TeamAssignment() {
             />
 
             <div className="toolbar">
-              <button onClick={generateTeams} disabled={DEV_LOCK}>
+              {/* 🔒 Disabled Buttons */}
+              <button className="btn-primary" onClick={generateTeams} disabled={DEV_LOCK}>
                 Generate Teams
               </button>
 
               <button
+                className="btn-secondary"
                 onClick={() => {
                   setSwapMode(!swapMode);
                   setSelectedPlayer(null);
@@ -241,7 +242,7 @@ function TeamAssignment() {
                 {swapMode ? "Cancel Swap" : "Swap Players"}
               </button>
 
-              <button onClick={resetAll} disabled={DEV_LOCK}>
+              <button className="btn-danger" onClick={resetAll} disabled={DEV_LOCK}>
                 Reset
               </button>
             </div>
@@ -254,6 +255,7 @@ function TeamAssignment() {
                   <h2>{index === 0 ? teamAName : teamBName}</h2>
 
                   <select
+                    className="captain-select"
                     value={captains[teamKey] || ""}
                     onChange={e => handleCaptainChange(teamKey, e.target.value)}
                   >
@@ -266,6 +268,7 @@ function TeamAssignment() {
                   {teams[teamKey].map(p => (
                     <div
                       key={p.id}
+                      className="player"
                       onClick={() => handleSwap(teamKey, p)}
                     >
                       {p.name} ({p.gender})
@@ -278,7 +281,7 @@ function TeamAssignment() {
           )}
 
           {teams && (
-            <button onClick={exportPDF}>
+            <button className="btn-primary" onClick={exportPDF}>
               Export PDF
             </button>
           )}
