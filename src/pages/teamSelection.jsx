@@ -7,7 +7,7 @@ function TeamAssignment() {
   const navigate = useNavigate();
 
   // 🔒 DEV LOCK (change to false to enable buttons)
-  const DEV_LOCK = true;
+  const DEV_LOCK = false;
 
   const [players, setPlayers] = useState([]);
   const [name, setName] = useState("");
