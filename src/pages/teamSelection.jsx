@@ -112,71 +112,31 @@ function TeamAssignment() {
     localStorage.setItem("captains", JSON.stringify(updated));
   };
 
- const exportPDF = () => {
-  const doc = new jsPDF();
+  const exportPDF = () => {
+    const doc = new jsPDF();
 
-  // 🎨 Title
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(18);
-  doc.setTextColor(40, 40, 40);
-  doc.text("🏏 Team Assignment", 70, 10);
+    doc.text(teamAName, 10, 10);
+    teams.teamA.forEach((p, i) => {
+      const isCaptain = captains.teamA == p.id;
+      doc.text(
+        `${p.name} (${p.gender}) ${isCaptain ? "👑" : ""}`,
+        10,
+        20 + i * 10
+      );
+    });
 
-  // 🔵 Team A Header
-  doc.setFontSize(14);
-  doc.setTextColor(0, 102, 204); // blue
-  doc.text(teamAName, 20, 30);
+    doc.text(teamBName, 100, 10);
+    teams.teamB.forEach((p, i) => {
+      const isCaptain = captains.teamB == p.id;
+      doc.text(
+        `${p.name} (${p.gender}) ${isCaptain ? "👑" : ""}`,
+        100,
+        20 + i * 10
+      );
+    });
 
-  // 🔴 Team B Header
-  doc.setTextColor(204, 0, 0); // red
-  doc.text(teamBName, 120, 30);
-
-  // Reset font for players
-  doc.setFontSize(11);
-
-  // 🟦 Team A Players
-  teams.teamA.forEach((p, i) => {
-    const y = 40 + i * 8;
-    const isCaptain = captains.teamA == p.id;
-
-    // Gender color
-    if (p.gender === "male") {
-      doc.setTextColor(0, 0, 255); // blue
-    } else {
-      doc.setTextColor(255, 105, 180); // pink
-    }
-
-    doc.text(
-      `${p.name} ${isCaptain ? "(Captain 👑)" : ""}`,
-      20,
-      y
-    );
-  });
-
-  // 🟥 Team B Players
-  teams.teamB.forEach((p, i) => {
-    const y = 40 + i * 8;
-    const isCaptain = captains.teamB == p.id;
-
-    if (p.gender === "male") {
-      doc.setTextColor(0, 0, 255);
-    } else {
-      doc.setTextColor(255, 105, 180);
-    }
-
-    doc.text(
-      `${p.name} ${isCaptain ? "(Captain 👑)" : ""}`,
-      120,
-      y
-    );
-  });
-
-  // 📦 Add border box
-  doc.setDrawColor(0);
-  doc.rect(10, 20, 190, 120);
-
-  // 💾 Save
-  doc.save("teams.pdf");
-};
+    doc.save("teams.pdf");
+  };
 
   const resetAll = () => {
     if (!window.confirm("Reset everything?")) return;
